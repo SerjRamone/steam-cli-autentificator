@@ -1,4 +1,4 @@
-<img align="right" width="50%" src="./images/gopher.png">
+<img align="right" width="30%" src="./images/gopher.png">
 
 ### Steam CLI Autentificator
 This is a command-line tool written in Go that generates a Steam Guard authorization code (2FA) 
@@ -31,6 +31,7 @@ go build -o sca
 ./sca 2fa /path/to/maFile
 ```
 The path to the maFile is required.
+<img src="./images/1.png">
 
 ### License
 This tool is licensed under the [MIT License](LICENSE.md).
