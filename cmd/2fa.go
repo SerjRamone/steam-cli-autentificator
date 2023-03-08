@@ -12,12 +12,16 @@ import (
 	"os"
 	"time"
 
+	"github.com/briandowns/spinner"
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
 type maFile struct {
 	SharedSecret string `json:"shared_secret"`
 }
+
+var IsInfinite bool
 
 // 2faCmd represents the 2fa command
 var _2faCmd = &cobra.Command{
@@ -57,15 +61,29 @@ func commandHandler(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	t := uint64(time.Now().Unix())
-
-	code, err := get2faCode(sharedSecret, t)
-	if err != nil {
-		fmt.Printf("2fa code generating error: %v\n", err)
-		return
+	var s *spinner.Spinner
+	if IsInfinite {
+		s = spinner.New(spinner.CharSets[14], 100*time.Millisecond)
+		s.Start()
 	}
 
-	fmt.Printf("Steam Guard code is: %s\n", code)
+	decorator := color.New(color.FgCyan, color.Bold)
+	for ok := true; ok; ok = IsInfinite {
+		t := uint64(time.Now().Unix())
+
+		code, err := get2faCode(sharedSecret, t)
+		if err != nil {
+			fmt.Printf("2fa code generating error: %v\n", err)
+			return
+		}
+
+		if IsInfinite {
+			s.Suffix = fmt.Sprintf(" Steam Guard code is: %s\n", decorator.Sprintf("%s", code))
+			time.Sleep(1 * time.Second)
+		} else {
+			fmt.Printf("Steam Guard code is: %s\n", decorator.Sprintf("%s", code))
+		}
+	}
 }
 
 // get2faCode generate Steam Guard authorization
@@ -130,5 +148,6 @@ func decodeSecret(encodedSecret string) ([]byte, error) {
 }
 
 func init() {
+	_2faCmd.Flags().BoolVarP(&IsInfinite, "infinite", "i", false, "infinite generating")
 	rootCmd.AddCommand(_2faCmd)
 }
